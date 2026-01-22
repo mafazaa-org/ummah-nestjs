@@ -7,8 +7,14 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Group, GroupDocument } from './schemas/group.schema';
-import { Conversation, ConversationDocument } from '../messages/schemas/conversation.schema';
-import { JoinRequest, JoinRequestDocument } from './schemas/join-request.schema';
+import {
+  Conversation,
+  ConversationDocument,
+} from '../messages/schemas/conversation.schema';
+import {
+  JoinRequest,
+  JoinRequestDocument,
+} from './schemas/join-request.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
@@ -17,8 +23,10 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 export class GroupsService {
   constructor(
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
-    @InjectModel(Conversation.name) private conversationModel: Model<ConversationDocument>,
-    @InjectModel(JoinRequest.name) private joinRequestModel: Model<JoinRequestDocument>,
+    @InjectModel(Conversation.name)
+    private conversationModel: Model<ConversationDocument>,
+    @InjectModel(JoinRequest.name)
+    private joinRequestModel: Model<JoinRequestDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
@@ -61,7 +69,9 @@ export class GroupsService {
       .lean()
       .exec();
 
-    const byId = new Map<string, any>(users.map((u: any) => [u._id.toString(), u]));
+    const byId = new Map<string, any>(
+      users.map((u: any) => [u._id.toString(), u]),
+    );
 
     const hydrateOne = (v: any) => {
       const id = toId(v);
@@ -111,20 +121,23 @@ export class GroupsService {
     savedGroup.conversation = savedConversation._id as any;
     await savedGroup.save();
 
-    console.log(`✅ Created group "${savedGroup.name}" with conversation ${savedConversation._id}`);
+    console.log(
+      `✅ Created group "${savedGroup.name}" with conversation ${savedConversation._id}`,
+    );
 
     return savedGroup;
   }
 
-  async findAll(userId: string, skip: number = 0, limit: number = 20): Promise<Group[]> {
+  async findAll(
+    userId: string,
+    skip: number = 0,
+    limit: number = 20,
+  ): Promise<Group[]> {
     // Show groups where user is a member OR public groups
     return this.groupModel
       .find({
         isDeleted: false,
-        $or: [
-          { members: userId },
-          { privacy: 'public' }
-        ]
+        $or: [{ members: userId }, { privacy: 'public' }],
       })
       .populate('admin', 'username firstName lastName avatar')
       .populate('admins', 'username firstName lastName avatar')
@@ -142,7 +155,10 @@ export class GroupsService {
       .populate('members', 'username firstName lastName avatar')
       .populate({
         path: 'pinnedPosts',
-        populate: { path: 'author', select: 'username firstName lastName avatar' }
+        populate: {
+          path: 'author',
+          select: 'username firstName lastName avatar',
+        },
       })
       .exec();
 
@@ -152,10 +168,14 @@ export class GroupsService {
 
     // Check if user is a member or if group is public
     // Handle both populated and non-populated members arrays
-    const isMember = group.members && group.members.some((member: any) => {
-      const memberId = member?._id ? member._id.toString() : member?.toString();
-      return memberId === userId;
-    });
+    const isMember =
+      group.members &&
+      group.members.some((member: any) => {
+        const memberId = member?._id
+          ? member._id.toString()
+          : member?.toString();
+        return memberId === userId;
+      });
 
     // احسب الـ admin بشكل يدعم الحالة المعبأة (populated) وغير المعبأة
     const mainAdminId = (group as any).admin?._id
@@ -261,7 +281,9 @@ export class GroupsService {
 
     // Check if group is private
     if (group.privacy === 'private') {
-      throw new ForbiddenException('هذا التكتل خاص. يجب أن يتم دعوتك من قبل المسؤول');
+      throw new ForbiddenException(
+        'هذا التكتل خاص. يجب أن يتم دعوتك من قبل المسؤول',
+      );
     }
 
     const userIdObj = userId as any;
@@ -276,14 +298,18 @@ export class GroupsService {
     }
 
     group.members.push(userIdObj);
-    
+
     // Add user to the group conversation
     if (group.conversation) {
-      const conversation = await this.conversationModel.findById(group.conversation);
+      const conversation = await this.conversationModel.findById(
+        group.conversation,
+      );
       if (conversation && !conversation.participants.includes(userIdObj)) {
         conversation.participants.push(userIdObj);
         await conversation.save();
-        console.log(`✅ Added user ${userId} to group conversation ${conversation._id}`);
+        console.log(
+          `✅ Added user ${userId} to group conversation ${conversation._id}`,
+        );
       }
     }
 
@@ -315,13 +341,17 @@ export class GroupsService {
 
     // Remove user from the group conversation
     if (group.conversation) {
-      const conversation = await this.conversationModel.findById(group.conversation);
+      const conversation = await this.conversationModel.findById(
+        group.conversation,
+      );
       if (conversation) {
         conversation.participants = conversation.participants.filter(
           (participant) => participant.toString() !== userId,
         );
         await conversation.save();
-        console.log(`✅ Removed user ${userId} from group conversation ${conversation._id}`);
+        console.log(
+          `✅ Removed user ${userId} from group conversation ${conversation._id}`,
+        );
       }
     }
 
@@ -338,10 +368,17 @@ export class GroupsService {
 
   // Helper method to check if user is admin
   private isUserAdmin(group: any, userId: string): boolean {
-    return group.admins && group.admins.some((admin: any) => admin.toString() === userId);
+    return (
+      group.admins &&
+      group.admins.some((admin: any) => admin.toString() === userId)
+    );
   }
 
-  async addMember(groupId: string, targetUserId: string, requesterId: string): Promise<Group> {
+  async addMember(
+    groupId: string,
+    targetUserId: string,
+    requesterId: string,
+  ): Promise<Group> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -365,15 +402,24 @@ export class GroupsService {
 
     // Add user to the group conversation
     if (group.conversation) {
-      const conversation = await this.conversationModel.findById(group.conversation);
-      if (conversation && !conversation.participants.includes(targetUserIdObj)) {
+      const conversation = await this.conversationModel.findById(
+        group.conversation,
+      );
+      if (
+        conversation &&
+        !conversation.participants.includes(targetUserIdObj)
+      ) {
         conversation.participants.push(targetUserIdObj);
         await conversation.save();
-        console.log(`✅ Added user ${targetUserId} to group conversation ${conversation._id}`);
+        console.log(
+          `✅ Added user ${targetUserId} to group conversation ${conversation._id}`,
+        );
       }
     }
 
-    console.log(`✅ Added user ${targetUserId} to group ${groupId} by admin ${requesterId}`);
+    console.log(
+      `✅ Added user ${targetUserId} to group ${groupId} by admin ${requesterId}`,
+    );
     const savedGroup = await group.save();
 
     // Return populated group
@@ -385,7 +431,11 @@ export class GroupsService {
       .exec();
   }
 
-  async removeMember(groupId: string, targetUserId: string, requesterId: string): Promise<Group> {
+  async removeMember(
+    groupId: string,
+    targetUserId: string,
+    requesterId: string,
+  ): Promise<Group> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -403,7 +453,10 @@ export class GroupsService {
     }
 
     // Cannot remove yourself if you're not the main admin
-    if (requesterId === targetUserId && group.admin.toString() !== requesterId) {
+    if (
+      requesterId === targetUserId &&
+      group.admin.toString() !== requesterId
+    ) {
       throw new BadRequestException('لا يمكنك إزالة نفسك من التكتل');
     }
 
@@ -419,17 +472,23 @@ export class GroupsService {
 
     // Remove user from the group conversation
     if (group.conversation) {
-      const conversation = await this.conversationModel.findById(group.conversation);
+      const conversation = await this.conversationModel.findById(
+        group.conversation,
+      );
       if (conversation) {
         conversation.participants = conversation.participants.filter(
           (participant) => participant.toString() !== targetUserId,
         );
         await conversation.save();
-        console.log(`✅ Removed user ${targetUserId} from group conversation ${conversation._id}`);
+        console.log(
+          `✅ Removed user ${targetUserId} from group conversation ${conversation._id}`,
+        );
       }
     }
 
-    console.log(`✅ Removed user ${targetUserId} from group ${groupId} by admin ${requesterId}`);
+    console.log(
+      `✅ Removed user ${targetUserId} from group ${groupId} by admin ${requesterId}`,
+    );
     const savedGroup = await group.save();
 
     // Return populated group
@@ -441,7 +500,11 @@ export class GroupsService {
       .exec();
   }
 
-  async promoteAdmin(groupId: string, targetUserId: string, requesterId: string): Promise<Group> {
+  async promoteAdmin(
+    groupId: string,
+    targetUserId: string,
+    requesterId: string,
+  ): Promise<Group> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -468,7 +531,9 @@ export class GroupsService {
     // Add user to admins
     group.admins.push(targetUserIdObj);
 
-    console.log(`✅ Promoted user ${targetUserId} to admin in group ${groupId} by admin ${requesterId}`);
+    console.log(
+      `✅ Promoted user ${targetUserId} to admin in group ${groupId} by admin ${requesterId}`,
+    );
     const savedGroup = await group.save();
 
     // Return populated group
@@ -480,7 +545,11 @@ export class GroupsService {
       .exec();
   }
 
-  async demoteAdmin(groupId: string, targetUserId: string, requesterId: string): Promise<Group> {
+  async demoteAdmin(
+    groupId: string,
+    targetUserId: string,
+    requesterId: string,
+  ): Promise<Group> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -514,7 +583,9 @@ export class GroupsService {
       (admin) => admin.toString() !== targetUserId,
     );
 
-    console.log(`✅ Demoted user ${targetUserId} from admin in group ${groupId} by admin ${requesterId}`);
+    console.log(
+      `✅ Demoted user ${targetUserId} from admin in group ${groupId} by admin ${requesterId}`,
+    );
     const savedGroup = await group.save();
 
     // Return populated group
@@ -526,7 +597,10 @@ export class GroupsService {
       .exec();
   }
 
-  async requestJoin(groupId: string, userId: string): Promise<{ message: string }> {
+  async requestJoin(
+    groupId: string,
+    userId: string,
+  ): Promise<{ message: string }> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -534,7 +608,9 @@ export class GroupsService {
     }
 
     // Check if user is already a member
-    const isMember = group.members.some((member) => member.toString() === userId);
+    const isMember = group.members.some(
+      (member) => member.toString() === userId,
+    );
     if (isMember) {
       throw new BadRequestException('أنت بالفعل عضو في هذا التكتل');
     }
@@ -556,11 +632,18 @@ export class GroupsService {
 
       // Add user to the group conversation
       if (group.conversation) {
-        const conversation = await this.conversationModel.findById(group.conversation);
-        if (conversation && !conversation.participants.includes(userId as any)) {
+        const conversation = await this.conversationModel.findById(
+          group.conversation,
+        );
+        if (
+          conversation &&
+          !conversation.participants.includes(userId as any)
+        ) {
           conversation.participants.push(userId as any);
           await conversation.save();
-          console.log(`✅ Added user ${userId} to group conversation ${conversation._id}`);
+          console.log(
+            `✅ Added user ${userId} to group conversation ${conversation._id}`,
+          );
         }
       }
 
@@ -577,12 +660,17 @@ export class GroupsService {
     });
 
     await joinRequest.save();
-    console.log(`📝 Created join request for user ${userId} to group ${groupId}`);
+    console.log(
+      `📝 Created join request for user ${userId} to group ${groupId}`,
+    );
 
     return { message: 'تم إرسال طلب الانضمام للمسؤول' };
   }
 
-  async getJoinRequests(groupId: string, userId: string): Promise<JoinRequest[]> {
+  async getJoinRequests(
+    groupId: string,
+    userId: string,
+  ): Promise<JoinRequest[]> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -601,7 +689,11 @@ export class GroupsService {
       .exec();
   }
 
-  async approveJoinRequest(groupId: string, targetUserId: string, requesterId: string): Promise<{ message: string }> {
+  async approveJoinRequest(
+    groupId: string,
+    targetUserId: string,
+    requesterId: string,
+  ): Promise<{ message: string }> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -628,11 +720,18 @@ export class GroupsService {
 
     // Add user to the group conversation
     if (group.conversation) {
-      const conversation = await this.conversationModel.findById(group.conversation);
-      if (conversation && !conversation.participants.includes(targetUserId as any)) {
+      const conversation = await this.conversationModel.findById(
+        group.conversation,
+      );
+      if (
+        conversation &&
+        !conversation.participants.includes(targetUserId as any)
+      ) {
         conversation.participants.push(targetUserId as any);
         await conversation.save();
-        console.log(`✅ Added user ${targetUserId} to group conversation ${conversation._id}`);
+        console.log(
+          `✅ Added user ${targetUserId} to group conversation ${conversation._id}`,
+        );
       }
     }
 
@@ -641,12 +740,18 @@ export class GroupsService {
     await joinRequest.save();
 
     await group.save();
-    console.log(`✅ Approved join request for user ${targetUserId} to group ${groupId} by admin ${requesterId}`);
+    console.log(
+      `✅ Approved join request for user ${targetUserId} to group ${groupId} by admin ${requesterId}`,
+    );
 
     return { message: 'تم قبول طلب الانضمام' };
   }
 
-  async rejectJoinRequest(groupId: string, targetUserId: string, requesterId: string): Promise<{ message: string }> {
+  async rejectJoinRequest(
+    groupId: string,
+    targetUserId: string,
+    requesterId: string,
+  ): Promise<{ message: string }> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -672,7 +777,9 @@ export class GroupsService {
     joinRequest.status = 'rejected';
     await joinRequest.save();
 
-    console.log(`❌ Rejected join request for user ${targetUserId} to group ${groupId} by admin ${requesterId}`);
+    console.log(
+      `❌ Rejected join request for user ${targetUserId} to group ${groupId} by admin ${requesterId}`,
+    );
 
     return { message: 'تم رفض طلب الانضمام' };
   }
@@ -695,15 +802,17 @@ export class GroupsService {
 
     // Update settings
     if (settings.allowMembersToPost !== undefined) {
-      const allow = typeof settings.allowMembersToPost === 'string'
-        ? settings.allowMembersToPost === 'true'
-        : !!settings.allowMembersToPost;
+      const allow =
+        typeof settings.allowMembersToPost === 'string'
+          ? settings.allowMembersToPost === 'true'
+          : !!settings.allowMembersToPost;
       group.allowMembersToPost = allow;
     }
     if (settings.showMemberNames !== undefined) {
-      const showNames = typeof settings.showMemberNames === 'string'
-        ? settings.showMemberNames === 'true'
-        : !!settings.showMemberNames;
+      const showNames =
+        typeof settings.showMemberNames === 'string'
+          ? settings.showMemberNames === 'true'
+          : !!settings.showMemberNames;
       group.showMemberNames = showNames;
     }
 
@@ -717,7 +826,11 @@ export class GroupsService {
       .populate('admins', 'username firstName lastName avatar')
       .exec();
   }
-  async pinPost(groupId: string, userId: string, postId: string): Promise<Group> {
+  async pinPost(
+    groupId: string,
+    userId: string,
+    postId: string,
+  ): Promise<Group> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -727,9 +840,12 @@ export class GroupsService {
     const userIdObj = userId as any;
 
     // Check if requester is admin
-    const isAdmin = group.admin.toString() === userId || this.isUserAdmin(group, userId);
+    const isAdmin =
+      group.admin.toString() === userId || this.isUserAdmin(group, userId);
     if (!isAdmin) {
-      throw new ForbiddenException('غير مصرح لك بتثبيت المنشورات في هذا التكتل');
+      throw new ForbiddenException(
+        'غير مصرح لك بتثبيت المنشورات في هذا التكتل',
+      );
     }
 
     // Initialize if undefined
@@ -740,20 +856,26 @@ export class GroupsService {
     const postIdObj = postId as any; // Cast to conform to ObjectId type
 
     // Check if already pinned (comparing strings)
-    const isPinned = group.pinnedPosts.some(id => id.toString() === postId);
+    const isPinned = group.pinnedPosts.some((id) => id.toString() === postId);
     if (isPinned) {
       throw new BadRequestException('المنشور مثبت بالفعل');
     }
 
     if (group.pinnedPosts.length >= 3) {
-       throw new BadRequestException('لقد وصلت للحد الأقصى للمنشورات المثبتة (3)');
+      throw new BadRequestException(
+        'لقد وصلت للحد الأقصى للمنشورات المثبتة (3)',
+      );
     }
 
     group.pinnedPosts.push(postIdObj);
     return group.save();
   }
 
-  async unpinPost(groupId: string, userId: string, postId: string): Promise<Group> {
+  async unpinPost(
+    groupId: string,
+    userId: string,
+    postId: string,
+  ): Promise<Group> {
     const group = await this.groupModel.findById(groupId);
 
     if (!group || group.isDeleted) {
@@ -761,16 +883,24 @@ export class GroupsService {
     }
 
     // Check if requester is admin
-    const isAdmin = group.admin.toString() === userId || this.isUserAdmin(group, userId);
+    const isAdmin =
+      group.admin.toString() === userId || this.isUserAdmin(group, userId);
     if (!isAdmin) {
-      throw new ForbiddenException('غير مصرح لك بإلغاء تثبيت المنشورات في هذا التكتل');
+      throw new ForbiddenException(
+        'غير مصرح لك بإلغاء تثبيت المنشورات في هذا التكتل',
+      );
     }
 
-    if (!group.pinnedPosts || !group.pinnedPosts.some(id => id.toString() === postId)) {
+    if (
+      !group.pinnedPosts ||
+      !group.pinnedPosts.some((id) => id.toString() === postId)
+    ) {
       throw new BadRequestException('المنشور غير مثبت');
     }
 
-    group.pinnedPosts = group.pinnedPosts.filter(id => id.toString() !== postId);
+    group.pinnedPosts = group.pinnedPosts.filter(
+      (id) => id.toString() !== postId,
+    );
     return group.save();
   }
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Story, StoryDocument } from './schemas/story.schema';
@@ -35,8 +39,10 @@ export class StoriesService {
       .skip(skip)
       .limit(limit)
       .exec();
-    
-    console.log(`📖 Found ${stories.length} active stories (out of ${await this.storyModel.countDocuments()} total)`);
+
+    console.log(
+      `📖 Found ${stories.length} active stories (out of ${await this.storyModel.countDocuments()} total)`,
+    );
     return stories;
   }
 

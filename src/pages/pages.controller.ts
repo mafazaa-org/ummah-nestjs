@@ -26,10 +26,7 @@ export class PagesController {
   }
 
   @Get()
-  findAll(
-    @Query('skip') skip?: string,
-    @Query('limit') limit?: string,
-  ) {
+  findAll(@Query('skip') skip?: string, @Query('limit') limit?: string) {
     return this.pagesService.findAll(
       skip ? parseInt(skip) : 0,
       limit ? parseInt(limit) : 20,

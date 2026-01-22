@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsArray, MaxLength, IsUrl, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  MaxLength,
+  IsUrl,
+  IsMongoId,
+} from 'class-validator';
 
 export class CreatePostDto {
   @IsString()

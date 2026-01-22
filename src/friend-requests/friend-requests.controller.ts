@@ -16,9 +16,7 @@ import { FriendRequestStatus } from './schemas/friend-request.schema';
 
 @Controller('friend-requests')
 export class FriendRequestsController {
-  constructor(
-    private readonly friendRequestsService: FriendRequestsService,
-  ) {}
+  constructor(private readonly friendRequestsService: FriendRequestsService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -36,7 +34,8 @@ export class FriendRequestsController {
   @Get()
   findAll(@Request() req: any, @Query('status') status?: string) {
     const statusEnum =
-      status && Object.values(FriendRequestStatus).includes(status as FriendRequestStatus)
+      status &&
+      Object.values(FriendRequestStatus).includes(status as FriendRequestStatus)
         ? (status as FriendRequestStatus)
         : undefined;
     return this.friendRequestsService.findAll(req.user.userId, statusEnum);

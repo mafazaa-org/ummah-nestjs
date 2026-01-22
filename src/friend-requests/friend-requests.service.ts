@@ -147,7 +147,7 @@ export class FriendRequestsService {
 
     // إضافة كل منهما كصديق للآخر في friends array
     await this.userModel.findByIdAndUpdate(friendRequest.sender, {
-      $addToSet: { 
+      $addToSet: {
         friends: friendRequest.receiver,
         following: friendRequest.receiver,
         followers: friendRequest.receiver,
@@ -155,14 +155,16 @@ export class FriendRequestsService {
     });
 
     await this.userModel.findByIdAndUpdate(friendRequest.receiver, {
-      $addToSet: { 
+      $addToSet: {
         friends: friendRequest.sender,
         following: friendRequest.sender,
         followers: friendRequest.sender,
       },
     });
 
-    console.log(`✅ Friend request accepted: ${friendRequest.sender} ↔️ ${friendRequest.receiver}`);
+    console.log(
+      `✅ Friend request accepted: ${friendRequest.sender} ↔️ ${friendRequest.receiver}`,
+    );
 
     return this.findOne(id);
   }

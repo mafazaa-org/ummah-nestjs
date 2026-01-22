@@ -3,7 +3,8 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class CodeGeneratorUtil {
   private static readonly CODE_LENGTH = 70;
-  private static readonly CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  private static readonly CHARS =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   /**
    * Generate a unique 70-character random code
@@ -16,7 +17,9 @@ export class CodeGeneratorUtil {
 
     // Fill remaining characters with random chars
     for (let i = 0; i < randomPartLength; i++) {
-      result += this.CHARS.charAt(Math.floor(Math.random() * this.CHARS.length));
+      result += this.CHARS.charAt(
+        Math.floor(Math.random() * this.CHARS.length),
+      );
     }
 
     return result;

@@ -1,5 +1,16 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Patch, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+  Patch,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { File } from 'multer';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -15,7 +26,23 @@ export class AuthController {
   @Post('register')
   register(@Body() createUserDto: CreateUserDto) {
     // #region agent log
-    try { const fs = require('fs'); const path = require('path'); const logPath = path.join(process.cwd(), '.cursor', 'debug.log'); fs.appendFileSync(logPath, JSON.stringify({location:'auth.controller.ts:12',message:'Register endpoint hit',data:{hasBody:!!createUserDto},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'}) + '\n'); } catch(e) {}
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const logPath = path.join(process.cwd(), '.cursor', 'debug.log');
+      fs.appendFileSync(
+        logPath,
+        JSON.stringify({
+          location: 'auth.controller.ts:12',
+          message: 'Register endpoint hit',
+          data: { hasBody: !!createUserDto },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'H',
+        }) + '\n',
+      );
+    } catch (e) { }
     // #endregion
     return this.authService.register(createUserDto);
   }
@@ -56,9 +83,13 @@ export class AuthController {
   async updateProfile(
     @Request() req: any,
     @Body() updateProfileDto: UpdateProfileDto,
-    @UploadedFile() avatar?: Express.Multer.File,
+    @UploadedFile() avatar?: File,
   ) {
-    return this.authService.updateProfile(req.user.userId, updateProfileDto, avatar);
+    return this.authService.updateProfile(
+      req.user.userId,
+      updateProfileDto,
+      avatar,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -68,7 +99,10 @@ export class AuthController {
     @Body() updateAuthCodeDto: UpdateAuthCodeDto,
   ) {
     try {
-      return await this.authService.updateAuthCode(req.user.userId, updateAuthCodeDto);
+      return await this.authService.updateAuthCode(
+        req.user.userId,
+        updateAuthCodeDto,
+      );
     } catch (error) {
       console.error('[AuthController] Update auth code error:', error);
       throw error;

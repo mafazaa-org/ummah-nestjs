@@ -5,13 +5,8 @@ export class AppController {
   @Get()
   getHello() {
     return {
-      message: 'مرحباً بك في Social Media API',
+      message: 'مرحبا',
       version: '1.0.0',
-      endpoints: {
-        auth: '/api/auth',
-        users: '/api/users',
-        posts: '/api/posts',
-      },
     };
   }
 

@@ -18,6 +18,7 @@ import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateGroupChatDto } from './dto/create-group-chat.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { diskStorage } from 'multer';
+import type { File } from 'multer';
 import { extname } from 'path';
 
 @Controller('messages')
@@ -27,13 +28,25 @@ export class MessagesController {
 
   // Conversations
   @Post('conversations')
-  createConversation(@Body() createConversationDto: CreateConversationDto, @Request() req: any) {
-    return this.messagesService.createConversation(createConversationDto, req.user.userId);
+  createConversation(
+    @Body() createConversationDto: CreateConversationDto,
+    @Request() req: any,
+  ) {
+    return this.messagesService.createConversation(
+      createConversationDto,
+      req.user.userId,
+    );
   }
 
   @Post('group-chats')
-  createGroupChat(@Body() createGroupChatDto: CreateGroupChatDto, @Request() req: any) {
-    return this.messagesService.createGroupChat(createGroupChatDto, req.user.userId);
+  createGroupChat(
+    @Body() createGroupChatDto: CreateGroupChatDto,
+    @Request() req: any,
+  ) {
+    return this.messagesService.createGroupChat(
+      createGroupChatDto,
+      req.user.userId,
+    );
   }
 
   @Get('conversations')
@@ -53,8 +66,14 @@ export class MessagesController {
 
   // Messages
   @Post()
-  createMessage(@Body() createMessageDto: CreateMessageDto, @Request() req: any) {
-    return this.messagesService.createMessage(createMessageDto, req.user.userId);
+  createMessage(
+    @Body() createMessageDto: CreateMessageDto,
+    @Request() req: any,
+  ) {
+    return this.messagesService.createMessage(
+      createMessageDto,
+      req.user.userId,
+    );
   }
 
   @Post('upload')
@@ -63,7 +82,8 @@ export class MessagesController {
       storage: diskStorage({
         destination: './uploads/messages',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
@@ -72,7 +92,9 @@ export class MessagesController {
       },
       fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif|mp4|mov|avi|pdf|doc|docx/;
-        const extName = allowedTypes.test(extname(file.originalname).toLowerCase());
+        const extName = allowedTypes.test(
+          extname(file.originalname).toLowerCase(),
+        );
         const mimeType = allowedTypes.test(file.mimetype);
 
         if (extName && mimeType) {
@@ -82,7 +104,7 @@ export class MessagesController {
       },
     }),
   )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  uploadFile(@UploadedFile() file: File) {
     return {
       fileUrl: `/uploads/messages/${file.filename}`,
       fileName: file.originalname,

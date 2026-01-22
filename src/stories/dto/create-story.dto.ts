@@ -1,4 +1,10 @@
-import { IsString, IsUrl, IsEnum, IsOptional, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsUrl,
+  IsEnum,
+  IsOptional,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateStoryDto {
   @IsUrl({}, { message: 'رابط الميديا غير صحيح' })

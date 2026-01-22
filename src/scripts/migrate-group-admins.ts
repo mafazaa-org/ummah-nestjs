@@ -25,9 +25,11 @@ async function bootstrap() {
 
   for (const group of groups) {
     // Check if admin is already in admins array
-    const adminInAdmins = group.admins && group.admins.some(
-      (admin: any) => admin.toString() === group.admin.toString()
-    );
+    const adminInAdmins =
+      group.admins &&
+      group.admins.some(
+        (admin: any) => admin.toString() === group.admin.toString(),
+      );
 
     if (!adminInAdmins) {
       // Add admin to admins array

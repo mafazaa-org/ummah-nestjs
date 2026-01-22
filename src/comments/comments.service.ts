@@ -69,7 +69,11 @@ export class CommentsService {
       .exec();
   }
 
-  async findReplies(commentId: string, skip = 0, limit = 20): Promise<Comment[]> {
+  async findReplies(
+    commentId: string,
+    skip = 0,
+    limit = 20,
+  ): Promise<Comment[]> {
     return this.commentModel
       .find({
         parentComment: commentId,

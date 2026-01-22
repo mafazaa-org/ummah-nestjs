@@ -32,7 +32,10 @@ export class Page {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Post' }], default: [] })
   pinnedPosts: Types.ObjectId[];
 
-  @Prop({ enum: ['business', 'community', 'brand', 'public_figure', 'other'], default: 'other' })
+  @Prop({
+    enum: ['business', 'community', 'brand', 'public_figure', 'other'],
+    default: 'other',
+  })
   category: string;
 
   @Prop({ default: false })

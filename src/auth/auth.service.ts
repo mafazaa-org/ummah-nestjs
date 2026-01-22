@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import type { File } from 'multer';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -22,7 +23,6 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
-
 
   async login(loginDto: LoginDto) {
     try {
@@ -46,25 +46,29 @@ export class AuthService {
       };
 
       const secret = this.configService.get<string>('JWT_SECRET');
-      const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET') || secret;
+      const refreshSecret =
+        this.configService.get<string>('JWT_REFRESH_SECRET') || secret;
       if (!secret) {
         throw new BadRequestException('JWT_SECRET غير موجود في ملف .env');
       }
 
       // Access token: short-lived (1 hour)
       const accessTokenExpires = '1h';
-      const accessToken = this.jwtService.sign(payload, { secret, expiresIn: accessTokenExpires });
+      const accessToken = this.jwtService.sign(payload, {
+        secret,
+        expiresIn: accessTokenExpires,
+      });
 
       // Refresh token: long-lived (30 days)
       const refreshTokenExpires = '30d';
       const refreshTokenPayload = {
         userId: userId,
         username: user.username,
-        type: 'refresh'
+        type: 'refresh',
       };
       const refreshToken = this.jwtService.sign(refreshTokenPayload, {
         secret: refreshSecret,
-        expiresIn: refreshTokenExpires
+        expiresIn: refreshTokenExpires,
       });
 
       // Store refresh token in user document
@@ -81,7 +85,7 @@ export class AuthService {
           lastName: user.lastName,
           avatar: user.avatar,
         },
-        message: 'تم تسجيل الدخول بنجاح'
+        message: 'تم تسجيل الدخول بنجاح',
       };
     } catch (error) {
       console.error('[AuthService] Login error:', error);
@@ -119,25 +123,29 @@ export class AuthService {
       };
 
       const secret = this.configService.get<string>('JWT_SECRET');
-      const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET') || secret;
+      const refreshSecret =
+        this.configService.get<string>('JWT_REFRESH_SECRET') || secret;
       if (!secret) {
         throw new BadRequestException('JWT_SECRET غير موجود في ملف .env');
       }
 
       // Access token: short-lived (1 hour)
       const accessTokenExpires = '1h';
-      const accessToken = this.jwtService.sign(payload, { secret, expiresIn: accessTokenExpires });
+      const accessToken = this.jwtService.sign(payload, {
+        secret,
+        expiresIn: accessTokenExpires,
+      });
 
       // Refresh token: long-lived (30 days)
       const refreshTokenExpires = '30d';
       const refreshTokenPayload = {
         userId: userId,
         username: user.username,
-        type: 'refresh'
+        type: 'refresh',
       };
       const refreshToken = this.jwtService.sign(refreshTokenPayload, {
         secret: refreshSecret,
-        expiresIn: refreshTokenExpires
+        expiresIn: refreshTokenExpires,
       });
 
       // Store refresh token in user document
@@ -155,16 +163,21 @@ export class AuthService {
           avatar: user.avatar,
         },
         authCode: authCode, // Return the auth code to show in popup
-        message: 'تم التسجيل بنجاح! احفظ رمز المصادقة الخاص بك'
+        message: 'تم التسجيل بنجاح! احفظ رمز المصادقة الخاص بك',
       };
     } catch (error) {
       // إعادة رمي الخطأ إذا كان من نوع HttpException
-      if (error instanceof BadRequestException || error instanceof ConflictException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      ) {
         throw error;
       }
       // خطأ غير متوقع
       console.error('Register error:', error);
-      throw new BadRequestException('فشل في التسجيل: ' + (error.message || 'خطأ غير معروف'));
+      throw new BadRequestException(
+        'فشل في التسجيل: ' + (error.message || 'خطأ غير معروف'),
+      );
     }
   }
 
@@ -189,7 +202,11 @@ export class AuthService {
     };
   }
 
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto, avatar?: Express.Multer.File) {
+  async updateProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+    avatar?: File,
+  ) {
     try {
       const user = await this.usersService.findOne(userId);
       if (!user) {
@@ -206,7 +223,9 @@ export class AuthService {
 
         // Validate file size (max 5MB)
         if (avatar.size > 5 * 1024 * 1024) {
-          throw new BadRequestException('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+          throw new BadRequestException(
+            'حجم الصورة يجب أن يكون أقل من 5 ميجابايت',
+          );
         }
 
         // Create uploads directory if it doesn't exist
@@ -226,8 +245,13 @@ export class AuthService {
       }
 
       // Check for username uniqueness if username is being updated
-      if (updateProfileDto.username && updateProfileDto.username !== user.username) {
-        const existingUser = await this.usersService.findByUsername(updateProfileDto.username);
+      if (
+        updateProfileDto.username &&
+        updateProfileDto.username !== user.username
+      ) {
+        const existingUser = await this.usersService.findByUsername(
+          updateProfileDto.username,
+        );
         if (existingUser && (existingUser as any)._id.toString() !== userId) {
           throw new ConflictException('اسم المستخدم مستخدم بالفعل');
         }
@@ -250,9 +274,8 @@ export class AuthService {
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         avatar: updatedUser.avatar,
-        message: 'تم تحديث الملف الشخصي بنجاح'
+        message: 'تم تحديث الملف الشخصي بنجاح',
       };
-
     } catch (error) {
       console.error('[AuthService] Update profile error:', error);
       throw error;
@@ -261,15 +284,18 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     try {
-      const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET') ||
-                           this.configService.get<string>('JWT_SECRET');
+      const refreshSecret =
+        this.configService.get<string>('JWT_REFRESH_SECRET') ||
+        this.configService.get<string>('JWT_SECRET');
 
       if (!refreshSecret) {
         throw new BadRequestException('JWT_SECRET غير موجود في ملف .env');
       }
 
       // Verify refresh token
-      const decoded = this.jwtService.verify(refreshToken, { secret: refreshSecret });
+      const decoded = this.jwtService.verify(refreshToken, {
+        secret: refreshSecret,
+      });
 
       if (decoded.type !== 'refresh') {
         throw new UnauthorizedException('Invalid refresh token');
@@ -291,22 +317,24 @@ export class AuthService {
       // New access token
       const accessToken = this.jwtService.sign(payload, {
         secret: this.configService.get<string>('JWT_SECRET'),
-        expiresIn: '1h'
+        expiresIn: '1h',
       });
 
       // New refresh token
       const refreshTokenPayload = {
         userId: (user as any)._id.toString(),
         username: user.username,
-        type: 'refresh'
+        type: 'refresh',
       };
       const newRefreshToken = this.jwtService.sign(refreshTokenPayload, {
         secret: refreshSecret,
-        expiresIn: '30d'
+        expiresIn: '30d',
       });
 
       // Update stored refresh token
-      await this.usersService.update((user as any)._id.toString(), { refreshToken: newRefreshToken });
+      await this.usersService.update((user as any)._id.toString(), {
+        refreshToken: newRefreshToken,
+      });
 
       return {
         access_token: accessToken,
@@ -319,9 +347,8 @@ export class AuthService {
           lastName: user.lastName,
           avatar: user.avatar,
         },
-        message: 'تم تجديد الجلسة بنجاح'
+        message: 'تم تجديد الجلسة بنجاح',
       };
-
     } catch (error) {
       console.error('[AuthService] Refresh token error:', error);
       throw new UnauthorizedException('فشل في تجديد الجلسة');
@@ -337,11 +364,15 @@ export class AuthService {
       if (updateAuthCodeDto.customCode) {
         // Use custom code provided by user
         newAuthCode = updateAuthCodeDto.customCode;
-        console.log(`[AuthService] Using custom auth code: ${newAuthCode.substring(0, 10)}...`);
+        console.log(
+          `[AuthService] Using custom auth code: ${newAuthCode.substring(0, 10)}...`,
+        );
       } else {
         // Generate random code
         newAuthCode = CodeGeneratorUtil.generateUniqueCode();
-        console.log(`[AuthService] Generated random auth code: ${newAuthCode.substring(0, 10)}...`);
+        console.log(
+          `[AuthService] Generated random auth code: ${newAuthCode.substring(0, 10)}...`,
+        );
       }
 
       // Check if the code is already in use
@@ -353,14 +384,15 @@ export class AuthService {
       // Update user's auth code
       await this.usersService.update(userId, { authCode: newAuthCode });
 
-      console.log(`[AuthService] Auth code updated successfully for user: ${userId}`);
+      console.log(
+        `[AuthService] Auth code updated successfully for user: ${userId}`,
+      );
 
       return {
         message: 'تم تحديث رمز المصادقة بنجاح',
         newAuthCode: newAuthCode,
-        type: updateAuthCodeDto.customCode ? 'custom' : 'random'
+        type: updateAuthCodeDto.customCode ? 'custom' : 'random',
       };
-
     } catch (error) {
       console.error('[AuthService] Update auth code error:', error);
       throw error;

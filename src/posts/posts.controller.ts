@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import type { File } from 'multer';
 import { extname } from 'path';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -32,10 +33,7 @@ export class PostsController {
   }
 
   @Get()
-  findAll(
-    @Query('skip') skip?: string,
-    @Query('limit') limit?: string,
-  ) {
+  findAll(@Query('skip') skip?: string, @Query('limit') limit?: string) {
     return this.postsService.findAll(
       skip ? parseInt(skip) : 0,
       limit ? parseInt(limit) : 20,
@@ -137,7 +135,8 @@ export class PostsController {
       storage: diskStorage({
         destination: './uploads/posts',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
@@ -146,7 +145,9 @@ export class PostsController {
       },
       fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif|mp4|mov|avi|webm/;
-        const extName = allowedTypes.test(extname(file.originalname).toLowerCase());
+        const extName = allowedTypes.test(
+          extname(file.originalname).toLowerCase(),
+        );
         const mimeType = allowedTypes.test(file.mimetype);
 
         if (extName && mimeType) {
@@ -156,7 +157,7 @@ export class PostsController {
       },
     }),
   )
-  uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
+  uploadFiles(@UploadedFiles() files: File[]) {
     return {
       files: files.map((file) => ({
         url: `/uploads/posts/${file.filename}`,

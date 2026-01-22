@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsEnum, IsArray, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsArray,
+  IsMongoId,
+} from 'class-validator';
 
 export class CreateConversationDto {
   @IsEnum(['private', 'group'])

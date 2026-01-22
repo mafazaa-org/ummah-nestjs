@@ -54,10 +54,7 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.userModel
-      .find({ isActive: true })
-      .select('-password')
-      .exec();
+    return this.userModel.find({ isActive: true }).select('-password').exec();
   }
 
   async searchUsers(query: string, currentUserId?: string): Promise<User[]> {
@@ -77,9 +74,7 @@ export class UsersService {
 
     // Exclude current user from results
     if (currentUserId) {
-      return users.filter(
-        (user) => user._id.toString() !== currentUserId,
-      );
+      return users.filter((user) => user._id.toString() !== currentUserId);
     }
 
     return users;
@@ -91,7 +86,10 @@ export class UsersService {
       .select('-password')
       .populate({
         path: 'pinnedPosts',
-        populate: { path: 'author', select: 'username firstName lastName avatar' }
+        populate: {
+          path: 'author',
+          select: 'username firstName lastName avatar',
+        },
       })
       .exec();
 
@@ -101,7 +99,6 @@ export class UsersService {
 
     return user;
   }
-
 
   async findByUsername(username: string): Promise<User | null> {
     return this.userModel
@@ -178,13 +175,15 @@ export class UsersService {
     if (!userId) return [];
 
     const user = await this.userModel.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException('المستخدم غير موجود');
     }
 
     // Ensure friends is an array
-    const friendsIds = Array.isArray((user as any).friends) ? (user as any).friends : [];
+    const friendsIds = Array.isArray((user as any).friends)
+      ? (user as any).friends
+      : [];
 
     // Get all friends (users in the friends array)
     const friends = await this.userModel
@@ -216,7 +215,9 @@ export class UsersService {
 
     // Limit pinned posts (e.g., max 3) - Optional but good practice
     if (user.pinnedPosts.length >= 3) {
-       throw new BadRequestException('لقد وصلت للحد الأقصى للمنشورات المثبتة (3)');
+      throw new BadRequestException(
+        'لقد وصلت للحد الأقصى للمنشورات المثبتة (3)',
+      );
     }
 
     user.pinnedPosts.push(postId);
@@ -234,7 +235,7 @@ export class UsersService {
       throw new BadRequestException('المنشور غير مثبت');
     }
 
-    user.pinnedPosts = user.pinnedPosts.filter(id => id !== postId);
+    user.pinnedPosts = user.pinnedPosts.filter((id) => id !== postId);
     await user.save();
     return user;
   }

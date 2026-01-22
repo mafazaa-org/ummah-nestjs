@@ -32,8 +32,7 @@ export class FriendRequest {
   updatedAt: Date;
 }
 
-export const FriendRequestSchema =
-  SchemaFactory.createForClass(FriendRequest);
+export const FriendRequestSchema = SchemaFactory.createForClass(FriendRequest);
 
 // Indexes for performance
 FriendRequestSchema.index({ sender: 1, receiver: 1 }, { unique: true });

@@ -12,9 +12,7 @@ import { UpdatePageDto } from './dto/update-page.dto';
 
 @Injectable()
 export class PagesService {
-  constructor(
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
-  ) {}
+  constructor(@InjectModel(Page.name) private pageModel: Model<PageDocument>) {}
 
   async create(createPageDto: CreatePageDto, userId: string): Promise<Page> {
     const page = new this.pageModel({
@@ -43,7 +41,10 @@ export class PagesService {
       .populate('followers', 'username firstName lastName avatar')
       .populate({
         path: 'pinnedPosts',
-        populate: { path: 'author', select: 'username firstName lastName avatar' }
+        populate: {
+          path: 'author',
+          select: 'username firstName lastName avatar',
+        },
       })
       .exec();
 
@@ -134,7 +135,11 @@ export class PagesService {
     return page.save();
   }
 
-  async addAdmin(pageId: string, adminId: string, userId: string): Promise<Page> {
+  async addAdmin(
+    pageId: string,
+    adminId: string,
+    userId: string,
+  ): Promise<Page> {
     const page = await this.pageModel.findById(pageId);
 
     if (!page || page.isDeleted) {
@@ -147,16 +152,23 @@ export class PagesService {
 
     const adminIdObj = adminId as any;
 
-    if (!page.admins.includes(adminIdObj) && page.admin.toString() !== adminId) {
+    if (
+      !page.admins.includes(adminIdObj) &&
+      page.admin.toString() !== adminId
+    ) {
       page.admins.push(adminIdObj);
     } else {
-       throw new BadRequestException('المستخدم مسؤول بالفعل');
+      throw new BadRequestException('المستخدم مسؤول بالفعل');
     }
 
     return page.save();
   }
 
-  async removeAdmin(pageId: string, adminId: string, userId: string): Promise<Page> {
+  async removeAdmin(
+    pageId: string,
+    adminId: string,
+    userId: string,
+  ): Promise<Page> {
     const page = await this.pageModel.findById(pageId);
 
     if (!page || page.isDeleted) {
@@ -167,9 +179,7 @@ export class PagesService {
       throw new ForbiddenException('فقط مالك الصفحة يمكنه إزالة المسؤولين');
     }
 
-    page.admins = page.admins.filter(
-      (id) => id.toString() !== adminId,
-    );
+    page.admins = page.admins.filter((id) => id.toString() !== adminId);
 
     return page.save();
   }
@@ -177,7 +187,9 @@ export class PagesService {
   async pinPost(pageId: string, userId: string, postId: string): Promise<Page> {
     const isAuthorized = await this.isAdminOrOwner(pageId, userId);
     if (!isAuthorized) {
-       throw new ForbiddenException('غير مصرح لك بتثبيت المنشورات في هذه الصفحة');
+      throw new ForbiddenException(
+        'غير مصرح لك بتثبيت المنشورات في هذه الصفحة',
+      );
     }
 
     const page = await this.pageModel.findById(pageId);
@@ -191,43 +203,57 @@ export class PagesService {
     const postIdObj = postId as any; // Cast to conform to ObjectId type
 
     // Check if already pinned (comparing strings)
-    const isPinned = page.pinnedPosts.some(id => id.toString() === postId);
+    const isPinned = page.pinnedPosts.some((id) => id.toString() === postId);
     if (isPinned) {
       throw new BadRequestException('المنشور مثبت بالفعل');
     }
 
     if (page.pinnedPosts.length >= 3) {
-       throw new BadRequestException('لقد وصلت للحد الأقصى للمنشورات المثبتة (3)');
+      throw new BadRequestException(
+        'لقد وصلت للحد الأقصى للمنشورات المثبتة (3)',
+      );
     }
 
     page.pinnedPosts.push(postIdObj);
     return page.save();
   }
 
-  async unpinPost(pageId: string, userId: string, postId: string): Promise<Page> {
+  async unpinPost(
+    pageId: string,
+    userId: string,
+    postId: string,
+  ): Promise<Page> {
     const isAuthorized = await this.isAdminOrOwner(pageId, userId);
     if (!isAuthorized) {
-       throw new ForbiddenException('غير مصرح لك بإلغاء تثبيت المنشورات في هذه الصفحة');
+      throw new ForbiddenException(
+        'غير مصرح لك بإلغاء تثبيت المنشورات في هذه الصفحة',
+      );
     }
 
     const page = await this.pageModel.findById(pageId);
     if (!page) throw new NotFoundException('الصفحة غير موجودة');
 
-    if (!page.pinnedPosts || !page.pinnedPosts.some(id => id.toString() === postId)) {
+    if (
+      !page.pinnedPosts ||
+      !page.pinnedPosts.some((id) => id.toString() === postId)
+    ) {
       throw new BadRequestException('المنشور غير مثبت');
     }
 
-    page.pinnedPosts = page.pinnedPosts.filter(id => id.toString() !== postId);
+    page.pinnedPosts = page.pinnedPosts.filter(
+      (id) => id.toString() !== postId,
+    );
     return page.save();
   }
 
   async isAdminOrOwner(pageId: string, userId: string): Promise<boolean> {
-     const page = await this.pageModel.findById(pageId);
-     if (!page) return false;
-     
-     const isOwner = page.admin.toString() === userId;
-     const isAdmin = page.admins && page.admins.some(id => id.toString() === userId);
-     
-     return isOwner || isAdmin;
+    const page = await this.pageModel.findById(pageId);
+    if (!page) return false;
+
+    const isOwner = page.admin.toString() === userId;
+    const isAdmin =
+      page.admins && page.admins.some((id) => id.toString() === userId);
+
+    return isOwner || isAdmin;
   }
 }

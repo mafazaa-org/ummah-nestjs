@@ -6,7 +6,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Message, MessageDocument } from './schemas/message.schema';
-import { Conversation, ConversationDocument } from './schemas/conversation.schema';
+import {
+  Conversation,
+  ConversationDocument,
+} from './schemas/conversation.schema';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateGroupChatDto } from './dto/create-group-chat.dto';
@@ -15,14 +18,20 @@ import { CreateGroupChatDto } from './dto/create-group-chat.dto';
 export class MessagesService {
   constructor(
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
-    @InjectModel(Conversation.name) private conversationModel: Model<ConversationDocument>,
+    @InjectModel(Conversation.name)
+    private conversationModel: Model<ConversationDocument>,
   ) {}
 
   // Conversations
-  async createConversation(createConversationDto: CreateConversationDto, currentUserId: string): Promise<Conversation> {
+  async createConversation(
+    createConversationDto: CreateConversationDto,
+    currentUserId: string,
+  ): Promise<Conversation> {
     // Always include the current user in participants
-    const participants = [...new Set([...createConversationDto.participants, currentUserId])];
-    
+    const participants = [
+      ...new Set([...createConversationDto.participants, currentUserId]),
+    ];
+
     // Check if private conversation already exists
     if (createConversationDto.type === 'private') {
       const existing = await this.conversationModel.findOne({
@@ -37,7 +46,9 @@ export class MessagesService {
       }
     }
 
-    console.log(`Creating new conversation with participants: ${participants.join(', ')}`);
+    console.log(
+      `Creating new conversation with participants: ${participants.join(', ')}`,
+    );
     const conversation = new this.conversationModel({
       ...createConversationDto,
       participants,
@@ -45,22 +56,29 @@ export class MessagesService {
     return conversation.save();
   }
 
-  async createGroupChat(createGroupChatDto: CreateGroupChatDto, currentUserId: string): Promise<Conversation> {
+  async createGroupChat(
+    createGroupChatDto: CreateGroupChatDto,
+    currentUserId: string,
+  ): Promise<Conversation> {
     // Always include the current user in participants
-    const participants = [...new Set([...createGroupChatDto.participants, currentUserId])];
-    
-    console.log(`Creating new group chat "${createGroupChatDto.name}" with participants: ${participants.join(', ')}`);
-    
+    const participants = [
+      ...new Set([...createGroupChatDto.participants, currentUserId]),
+    ];
+
+    console.log(
+      `Creating new group chat "${createGroupChatDto.name}" with participants: ${participants.join(', ')}`,
+    );
+
     const conversation = new this.conversationModel({
       type: 'group',
       participants,
       name: createGroupChatDto.name,
       avatar: createGroupChatDto.avatar,
     });
-    
+
     const savedConversation = await conversation.save();
     console.log(`✅ Created standalone group chat: ${savedConversation._id}`);
-    
+
     return savedConversation;
   }
 
@@ -108,8 +126,13 @@ export class MessagesService {
   }
 
   // Messages
-  async createMessage(createMessageDto: CreateMessageDto, senderId: string): Promise<Message> {
-    const conversation = await this.conversationModel.findById(createMessageDto.conversation);
+  async createMessage(
+    createMessageDto: CreateMessageDto,
+    senderId: string,
+  ): Promise<Message> {
+    const conversation = await this.conversationModel.findById(
+      createMessageDto.conversation,
+    );
 
     if (!conversation || conversation.isDeleted) {
       throw new NotFoundException('المحادثة غير موجودة');
@@ -135,8 +158,15 @@ export class MessagesService {
     return message.populate('sender', 'username firstName lastName avatar');
   }
 
-  async getMessages(conversationId: string, userId: string, skip = 0, limit = 50): Promise<Message[]> {
-    console.log(`📨 Getting messages for conversation: ${conversationId}, userId: ${userId}`);
+  async getMessages(
+    conversationId: string,
+    userId: string,
+    skip = 0,
+    limit = 50,
+  ): Promise<Message[]> {
+    console.log(
+      `📨 Getting messages for conversation: ${conversationId}, userId: ${userId}`,
+    );
     const conversation = await this.conversationModel.findById(conversationId);
 
     if (!conversation || conversation.isDeleted) {
@@ -144,17 +174,23 @@ export class MessagesService {
       throw new NotFoundException('المحادثة غير موجودة');
     }
 
-    console.log(`👥 Conversation participants: ${conversation.participants.map(p => p.toString()).join(', ')}`);
-    
+    console.log(
+      `👥 Conversation participants: ${conversation.participants.map((p) => p.toString()).join(', ')}`,
+    );
+
     // Check if user is participant
     if (!conversation.participants.some((p) => p.toString() === userId)) {
-      console.error(`❌ User ${userId} is NOT a participant of conversation ${conversationId}`);
-      console.error(`   Participants are: ${conversation.participants.map(p => p.toString()).join(', ')}`);
+      console.error(
+        `❌ User ${userId} is NOT a participant of conversation ${conversationId}`,
+      );
+      console.error(
+        `   Participants are: ${conversation.participants.map((p) => p.toString()).join(', ')}`,
+      );
       throw new BadRequestException('غير مصرح لك بعرض هذه المحادثة');
     }
 
     console.log(`✅ User ${userId} is a participant, fetching messages...`);
-    
+
     return this.messageModel
       .find({
         conversation: conversationId,

@@ -23,7 +23,13 @@ import { MessagesModule } from './messages/messages.module';
     }),
 
     // MongoDB Connection with Security
-    MongooseModule.forRoot('mongodb://localhost:27017/test'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
+    }),
 
     // Rate Limiting for Security
     ThrottlerModule.forRootAsync({

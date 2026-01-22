@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 
 async function fixOldConversations() {
   console.log('🔧 Starting conversation fix script...');
-  
+
   const app = await NestFactory.createApplicationContext(AppModule);
   const conversationModel = app.get(getModelToken('Conversation'));
   const messageModel = app.get(getModelToken('Message'));
@@ -21,10 +21,14 @@ async function fixOldConversations() {
       const conversationId = conversation._id.toString();
       console.log(`\n🔍 Checking conversation ${conversationId}...`);
       console.log(`   Type: ${conversation.type}`);
-      console.log(`   Current participants: ${conversation.participants.map((p: any) => p.toString()).join(', ')}`);
+      console.log(
+        `   Current participants: ${conversation.participants.map((p: any) => p.toString()).join(', ')}`,
+      );
 
       // Get all messages in this conversation
-      const messages = await messageModel.find({ conversation: conversationId });
+      const messages = await messageModel.find({
+        conversation: conversationId,
+      });
       console.log(`   Messages count: ${messages.length}`);
 
       if (messages.length === 0) {
@@ -37,17 +41,26 @@ async function fixOldConversations() {
       console.log(`   Unique senders: ${Array.from(senders).join(', ')}`);
 
       // Check if all senders are participants
-      const participantIds = new Set(conversation.participants.map((p: any) => p.toString()));
-      const missingSenders = Array.from(senders).filter(senderId => !participantIds.has(senderId));
+      const participantIds = new Set(
+        conversation.participants.map((p: any) => p.toString()),
+      );
+      const missingSenders = Array.from(senders).filter(
+        (senderId) => !participantIds.has(senderId),
+      );
 
       if (missingSenders.length > 0) {
-        console.log(`   ❌ Found ${missingSenders.length} senders not in participants:`, missingSenders);
-        
+        console.log(
+          `   ❌ Found ${missingSenders.length} senders not in participants:`,
+          missingSenders,
+        );
+
         // Add missing senders to participants
         conversation.participants.push(...missingSenders);
         await conversation.save();
-        
-        console.log(`   ✅ Fixed! New participants: ${conversation.participants.map((p: any) => p.toString()).join(', ')}`);
+
+        console.log(
+          `   ✅ Fixed! New participants: ${conversation.participants.map((p: any) => p.toString()).join(', ')}`,
+        );
         fixedCount++;
       } else {
         console.log(`   ✅ All senders are participants, OK`);
@@ -58,7 +71,6 @@ async function fixOldConversations() {
     console.log(`   Total conversations checked: ${conversations.length}`);
     console.log(`   Conversations fixed: ${fixedCount}`);
     console.log(`   Conversations OK: ${conversations.length - fixedCount}`);
-
   } catch (error) {
     console.error('❌ Error during fix:', error);
   } finally {

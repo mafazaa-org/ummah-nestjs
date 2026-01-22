@@ -5,11 +5,9 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   MessageBody,
-  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
-import { UseGuards } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
@@ -18,7 +16,8 @@ import { UseGuards } from '@nestjs/common';
   },
   transports: ['websocket', 'polling'],
 })
-export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class MessagesGateway
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -35,9 +34,10 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   handleDisconnect(client: Socket) {
-    const userId = Array.from(this.connectedUsers.entries())
-      .find(([_, socketId]) => socketId === client.id)?.[0];
-    
+    const userId = Array.from(this.connectedUsers.entries()).find(
+      ([, socketId]) => socketId === client.id,
+    )?.[0];
+
     if (userId) {
       this.connectedUsers.delete(userId);
       console.log(`User ${userId} disconnected`);
@@ -46,8 +46,13 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   @SubscribeMessage('sendMessage')
   async handleMessage(
-    @MessageBody() data: { conversationId: string; content: string; type: string; senderId: string },
-    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      conversationId: string;
+      content: string;
+      type: string;
+      senderId: string;
+    },
   ) {
     try {
       console.log(`📩 Received sendMessage event from ${data.senderId}:`, {
@@ -56,25 +61,34 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         type: data.type,
       });
 
-      const message = await this.messagesService.createMessage({
-        conversation: data.conversationId,
-        type: data.type,
-        content: data.content,
-      }, data.senderId);
+      const message = await this.messagesService.createMessage(
+        {
+          conversation: data.conversationId,
+          type: data.type,
+          content: data.content,
+        },
+        data.senderId,
+      );
 
       console.log(`✅ Message created successfully: ${(message as any)._id}`);
 
       // Get conversation participants
-      const conversation = await this.messagesService.getConversation(data.conversationId);
-      
+      const conversation = await this.messagesService.getConversation(
+        data.conversationId,
+      );
+
       // Send message to all participants
       conversation.participants.forEach((participantId: any) => {
         const socketId = this.connectedUsers.get(participantId.toString());
         if (socketId) {
-          console.log(`📤 Sending message to participant ${participantId.toString()}`);
+          console.log(
+            `📤 Sending message to participant ${participantId.toString()}`,
+          );
           this.server.to(socketId).emit('newMessage', message);
         } else {
-          console.log(`⚠️ Participant ${participantId.toString()} is not connected`);
+          console.log(
+            `⚠️ Participant ${participantId.toString()} is not connected`,
+          );
         }
       });
 
@@ -99,7 +113,12 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   @SubscribeMessage('typing')
   handleTyping(
-    @MessageBody() data: { conversationId: string; userId: string; isTyping: boolean },
+    @MessageBody()
+    data: {
+      conversationId: string;
+      userId: string;
+      isTyping: boolean;
+    },
   ) {
     // Broadcast typing status to other participants
     this.server.emit(`typing:${data.conversationId}`, {

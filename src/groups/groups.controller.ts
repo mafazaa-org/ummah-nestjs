@@ -89,7 +89,11 @@ export class GroupsController {
     @Body() manageMemberDto: ManageMemberDto,
     @Request() req: any,
   ) {
-    return this.groupsService.addMember(id, manageMemberDto.userId, req.user.userId);
+    return this.groupsService.addMember(
+      id,
+      manageMemberDto.userId,
+      req.user.userId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -99,7 +103,11 @@ export class GroupsController {
     @Body() manageMemberDto: ManageMemberDto,
     @Request() req: any,
   ) {
-    return this.groupsService.removeMember(id, manageMemberDto.userId, req.user.userId);
+    return this.groupsService.removeMember(
+      id,
+      manageMemberDto.userId,
+      req.user.userId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -109,7 +117,11 @@ export class GroupsController {
     @Body() manageMemberDto: ManageMemberDto,
     @Request() req: any,
   ) {
-    return this.groupsService.promoteAdmin(id, manageMemberDto.userId, req.user.userId);
+    return this.groupsService.promoteAdmin(
+      id,
+      manageMemberDto.userId,
+      req.user.userId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -119,7 +131,11 @@ export class GroupsController {
     @Body() manageMemberDto: ManageMemberDto,
     @Request() req: any,
   ) {
-    return this.groupsService.demoteAdmin(id, manageMemberDto.userId, req.user.userId);
+    return this.groupsService.demoteAdmin(
+      id,
+      manageMemberDto.userId,
+      req.user.userId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -141,7 +157,11 @@ export class GroupsController {
     @Body() joinRequestDto: JoinRequestDto,
     @Request() req: any,
   ) {
-    return this.groupsService.approveJoinRequest(id, joinRequestDto.userId, req.user.userId);
+    return this.groupsService.approveJoinRequest(
+      id,
+      joinRequestDto.userId,
+      req.user.userId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -151,7 +171,11 @@ export class GroupsController {
     @Body() joinRequestDto: JoinRequestDto,
     @Request() req: any,
   ) {
-    return this.groupsService.rejectJoinRequest(id, joinRequestDto.userId, req.user.userId);
+    return this.groupsService.rejectJoinRequest(
+      id,
+      joinRequestDto.userId,
+      req.user.userId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -161,7 +185,11 @@ export class GroupsController {
     @Body() updateGroupSettingsDto: UpdateGroupSettingsDto,
     @Request() req: any,
   ) {
-    return this.groupsService.updateGroupSettings(id, updateGroupSettingsDto, req.user.userId);
+    return this.groupsService.updateGroupSettings(
+      id,
+      updateGroupSettingsDto,
+      req.user.userId,
+    );
   }
   @UseGuards(JwtAuthGuard)
   @Post(':id/pin/:postId')
