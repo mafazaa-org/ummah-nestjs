@@ -22,7 +22,7 @@ import { MessagesModule } from './messages/messages.module';
       envFilePath: '.env',
     }),
 
-    // MongoDB Connection with Security
+    // MongoDB Connection
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

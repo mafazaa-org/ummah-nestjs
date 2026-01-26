@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
-import type { File } from 'multer';
+import { Express } from 'express';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -205,7 +205,7 @@ export class AuthService {
   async updateProfile(
     userId: string,
     updateProfileDto: UpdateProfileDto,
-    avatar?: File,
+    avatar?: Express.Multer.File,
   ) {
     try {
       const user = await this.usersService.findOne(userId);

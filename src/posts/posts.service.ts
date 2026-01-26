@@ -33,6 +33,7 @@ export class PostsService {
       .find({ isDeleted: false })
       .populate('author', 'username firstName lastName avatar')
       .populate('likes', 'username')
+      .populate('group', 'name')
       .populate({
         path: 'originalPost',
         populate: {
