@@ -10,7 +10,6 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -83,7 +82,7 @@ export class AuthController {
   async updateProfile(
     @Request() req: any,
     @Body() updateProfileDto: UpdateProfileDto,
-    @UploadedFile() avatar?: Express.Multer.File,
+    @UploadedFile() avatar?: any,
   ) {
     return this.authService.updateProfile(
       req.user.userId,

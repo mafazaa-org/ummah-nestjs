@@ -18,7 +18,6 @@ import { CreateConversationDto } from './dto/create-conversation.dto';
 import { CreateGroupChatDto } from './dto/create-group-chat.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { diskStorage } from 'multer';
-import { Express } from 'express';
 import { extname } from 'path';
 
 @Controller('messages')
@@ -104,7 +103,7 @@ export class MessagesController {
       },
     }),
   )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  uploadFile(@UploadedFile() file: any) {
     return {
       fileUrl: `/uploads/messages/${file.filename}`,
       fileName: file.originalname,

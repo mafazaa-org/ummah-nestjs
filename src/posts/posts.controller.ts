@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { Express } from 'express';
 import { extname } from 'path';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -157,7 +156,7 @@ export class PostsController {
       },
     }),
   )
-  uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
+  uploadFiles(@UploadedFiles() files: any[]) {
     return {
       files: files.map((file) => ({
         url: `/uploads/posts/${file.filename}`,

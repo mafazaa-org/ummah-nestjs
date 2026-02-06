@@ -205,7 +205,7 @@ export class AuthService {
   async updateProfile(
     userId: string,
     updateProfileDto: UpdateProfileDto,
-    avatar?: Express.Multer.File,
+    avatar?: any,
   ) {
     try {
       const user = await this.usersService.findOne(userId);
