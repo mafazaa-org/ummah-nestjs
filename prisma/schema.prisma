@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum PostStatus {
+  ACTIVE
+  HIDDEN
+  DELETED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum ReportReason {
+  RELIGIOUS_VIOLATION
+  VIOLENCE
+  SPAM
+  OTHER
+}
+
+model User {
+  id          String     @id @default(uuid())
+  firebaseUid String     @unique @db.VarChar(128)
+  displayName String     @db.VarChar(50)
+  bio         String?    @db.VarChar(160)
+  avatarKey   String?    @db.VarChar(512)
+  status      UserStatus @default(ACTIVE)
+  reportCount Int        @default(0)
+  createdAt   DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime   @updatedAt @db.Timestamptz(3)
+
+  posts       Post[]
+  reportsMade Report[] @relation("ReportsMade")
+
+  @@map("users")
+}
+
+model Post {
+  id          String     @id @default(uuid())
+  authorId    String
+  author      User       @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  text        String?    @db.VarChar(2000)
+  status      PostStatus @default(ACTIVE)
+  reportCount Int        @default(0)
+  createdAt   DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime   @updatedAt @db.Timestamptz(3)
+
+  media   PostMedia[]
+  reports Report[]
+
+  @@index([status, createdAt(sort: Desc), id(sort: Desc), authorId])
+  @@index([authorId, createdAt(sort: Desc), id(sort: Desc)])
+  @@map("posts")
+}
+
+model PostMedia {
+  id        String    @id @default(uuid())
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  key       String    @unique @db.VarChar(512)
+  type      MediaType
+  position  Int
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@unique([postId, position])
+  @@map("post_media")
+}
+
+model Report {
+  id         String       @id @default(uuid())
+  postId     String
+  post       Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User         @relation("ReportsMade", fields: [reporterId], references: [id], onDelete: Restrict)
+  reason     ReportReason
+  createdAt  DateTime     @default(now()) @db.Timestamptz(3)
+
+  @@unique([postId, reporterId])
+  @@map("reports")
+}
