@@ -15,7 +15,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "seed": "ts-node scripts/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.600.0",
