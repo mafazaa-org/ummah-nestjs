@@ -11,6 +11,8 @@ import { HealthModule } from './modules/health/health.module';
 import { UsersModule } from './modules/users/users.module';
 import { MediaModule } from './modules/media/media.module';
 import { PostsModule } from './modules/posts/posts.module';
+import { FeedModule } from './modules/feed/feed.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { PostsModule } from './modules/posts/posts.module';
     UsersModule,
     MediaModule,
     PostsModule,
+    FeedModule,
+    ReportsModule,
   ],
   providers: [
     // Order matters (BRD §2.4): ThrottlerGuard -> AuthGuard -> ValidationPipe.
