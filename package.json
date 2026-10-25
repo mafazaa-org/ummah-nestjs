@@ -1,7 +1,7 @@
 {
-  "name": "ummah-backend",
+  "name": "oqab-backend",
   "version": "1.0.0",
-  "description": "Ummah Social Media Platform V1 Backend",
+  "description": "Oqab Social Platform V1 Backend",
   "private": true,
   "scripts": {
     "build": "nest build",

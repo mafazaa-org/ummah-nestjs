@@ -18,8 +18,8 @@ async function bootstrap() {
   const isProduction = configService.get<string>('NODE_ENV') === 'production';
   if (!isProduction) {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('Ummah Backend API')
-      .setDescription('Ummah Social Media Platform V1 API Specification')
+      .setTitle('Oqab Backend API')
+      .setDescription('Oqab Social Platform V1 API Specification')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
@@ -31,7 +31,7 @@ async function bootstrap() {
   const port = configService.get<number>('PORT', 3000);
   await app.listen(port);
   console.log(
-    `🚀 Ummah API running on port ${port} (Swagger docs: ${!isProduction ? '/docs' : 'DISABLED'})`,
+    `🚀 Oqab API running on port ${port} (Swagger docs: ${!isProduction ? '/docs' : 'DISABLED'})`,
   );
 }
 

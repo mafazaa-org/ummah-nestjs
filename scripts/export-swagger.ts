@@ -9,8 +9,8 @@ async function exportSwagger() {
   const app = await NestFactory.create(AppModule, { logger: false });
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Ummah Backend API')
-    .setDescription('Ummah Social Media Platform V1 API Specification')
+    .setTitle('Oqab Backend API')
+    .setDescription('Oqab Social Platform V1 API Specification')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

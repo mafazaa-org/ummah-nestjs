@@ -22,7 +22,7 @@ async function main() {
     {
       firebaseUid: 'dev-user-khalid',
       displayName: 'خالد بن الوليد',
-      bio: 'مطور أعمال وشغوف بمشاريع الأمة الناشئة 🚀',
+      bio: 'مطور أعمال وشغوف بمشاريع عُقاب الناشئة 🚀',
       avatarKey: null,
     },
   ];
@@ -42,7 +42,7 @@ async function main() {
   const postsData = [
     {
       authorId: createdUsers[0].id,
-      text: 'السلام عليكم ورحمة الله وبركاته، أهلاً بكم في شبكة أمة! نسعد بتواجدكم في هذه المنصة الهادفة 🌟',
+      text: 'السلام عليكم ورحمة الله وبركاته، أهلاً بكم في شبكة عُقاب! نسعد بتواجدكم في هذه المنصة الهادفة 🌟',
     },
     {
       authorId: createdUsers[1].id,
