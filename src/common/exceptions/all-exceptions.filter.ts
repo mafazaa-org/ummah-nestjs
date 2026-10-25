@@ -31,10 +31,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
       } else if (statusCode === HttpStatus.TOO_MANY_REQUESTS) {
         code = 'TOO_MANY_REQUESTS';
         message = 'Too many requests, please try again later';
+      } else if (statusCode === HttpStatus.PAYLOAD_TOO_LARGE) {
+        code = 'PAYLOAD_TOO_LARGE';
+        message = response?.message || 'Payload too large';
       } else {
         code = response?.code || 'HTTP_ERROR';
         message = response?.message || exception.message;
       }
+    } else if (
+      (exception as any)?.status === HttpStatus.PAYLOAD_TOO_LARGE ||
+      (exception as any)?.statusCode === HttpStatus.PAYLOAD_TOO_LARGE
+    ) {
+      statusCode = HttpStatus.PAYLOAD_TOO_LARGE;
+      code = 'PAYLOAD_TOO_LARGE';
+      message = (exception as any)?.message || 'Payload too large';
     } else {
       this.logger.error(
         `Unhandled error processing ${req.method} ${req.url}`,
