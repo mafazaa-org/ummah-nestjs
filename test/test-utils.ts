@@ -57,7 +57,7 @@ export function getFakeS3(app: INestApplication): FakeS3Service {
 export async function resetDb(app: INestApplication): Promise<void> {
   assertTestDatabase(process.env.DATABASE_URL);
   await getPrisma(app).$executeRawUnsafe(
-    'TRUNCATE TABLE "reports", "post_media", "posts", "users" RESTART IDENTITY CASCADE',
+    'TRUNCATE TABLE "comments", "reports", "post_media", "posts", "users" RESTART IDENTITY CASCADE',
   );
 }
 

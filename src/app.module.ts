@@ -13,6 +13,7 @@ import { MediaModule } from './modules/media/media.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { FeedModule } from './modules/feed/feed.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     PostsModule,
     FeedModule,
     ReportsModule,
+    CommentsModule,
   ],
   providers: [
     // Order matters (BRD §2.4): ThrottlerGuard -> AuthGuard -> ValidationPipe.

@@ -28,3 +28,7 @@ lerna-debug.log*
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Local Career Case Study (Personal)
+docs/CAREER_CASE_STUDY_IBRAHIM_HASHISH.md
+

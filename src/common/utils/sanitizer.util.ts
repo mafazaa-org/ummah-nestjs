@@ -17,3 +17,24 @@ export function sanitizeText(value: string): string {
 export const SanitizeText = () =>
   Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? sanitizeText(value) : value));
 
+/**
+ * BRD V2 §6.2 sanitizeFileName:
+ * Strip control characters, null bytes, directory traversal patterns (/ and \), and limit to 120 chars.
+ */
+export function sanitizeFileName(name: string): string {
+  if (!name || typeof name !== 'string') return '';
+  // Strip control chars
+  let cleaned = name.replace(DISALLOWED_CONTROL_CHARS, '');
+  // Strip directory paths (e.g. C:\foo or ../../bar)
+  cleaned = cleaned.replace(/^.*[\\/]/, '');
+  // Strip leading dots to prevent hidden files
+  cleaned = cleaned.replace(/^\.+/, '');
+  // Trim spaces
+  cleaned = cleaned.trim();
+  // Cut to max 120 characters
+  return cleaned.substring(0, 120);
+}
+
+export const SanitizeFileName = () =>
+  Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? sanitizeFileName(value) : value));
+
